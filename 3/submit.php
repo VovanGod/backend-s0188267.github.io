@@ -1,5 +1,4 @@
 <?php
-// Подключение к базе данных
 $user = 'u68609';
 $pass = '1793514';
 
@@ -12,7 +11,6 @@ try {
     die("Ошибка подключения к базе данных: " . $e->getMessage());
 }
 
-// Валидация данных
 $errors = [];
 
 if (empty($_POST['fullname'])) {
@@ -21,10 +19,6 @@ if (empty($_POST['fullname'])) {
     $errors[] = "Поле ФИО должно содержать только буквы и пробелы и быть не длиннее 150 символов.";
 }
 
-// Остальные проверки (телефон, email, дата рождения и т.д.) остаются без изменений
-// ...
-
-// Если есть ошибки, выводим их
 if (count($errors) > 0) {
     foreach ($errors as $error) {
         echo "<p style='color: red;'>$error</p>";
@@ -32,22 +26,21 @@ if (count($errors) > 0) {
     exit;
 }
 
-// Разделение ФИО на фамилию, имя и отчество
 $fullname = trim($_POST['fullname']);
-$nameParts = explode(' ', $fullname);  // Разделяем строку по пробелам
+$nameParts = explode(' ', $fullname); 
 
-$last_name = $nameParts[0] ?? '';      // Фамилия (первая часть)
-$first_name = $nameParts[1] ?? '';     // Имя (вторая часть)
-$patronymic = $nameParts[2] ?? null;   // Отчество (третья часть, если есть)
+$last_name = $nameParts[0] ?? '';    
+$first_name = $nameParts[1] ?? '';   
+$patronymic = $nameParts[2] ?? null; 
 
-// Вставка данных в таблицу application
+
 try {
     $stmt = $db->prepare("INSERT INTO application (first_name, last_name, patronymic, phone, email, dob, gender, bio) 
                           VALUES (:first_name, :last_name, :patronymic, :phone, :email, :dob, :gender, :bio)");
     $stmt->execute([
         ':first_name' => $first_name,
         ':last_name' => $last_name,
-        ':patronymic' => $patronymic,  // Отчество может быть NULL
+        ':patronymic' => $patronymic,
         ':phone' => $_POST['phone'],
         ':email' => $_POST['email'],
         ':dob' => $_POST['dob'],
@@ -55,10 +48,8 @@ try {
         ':bio' => $_POST['bio']
     ]);
 
-    // Получаем ID последней вставленной записи
     $applicationId = $db->lastInsertId();
 
-    // Вставка данных в таблицу application_languages
     foreach ($_POST['languages'] as $language) {
         $stmt = $db->prepare("INSERT INTO application_languages (application_id, language_id) 
                               VALUES (:application_id, (SELECT id FROM languages WHERE name = :language))");
@@ -73,7 +64,6 @@ try {
     die("Ошибка при сохранении данных: " . $e->getMessage());
 }
 
-// Вывод списка заявок
 try {
     $stmt = $db->query("SELECT a.id, a.first_name, a.last_name, a.patronymic, a.email, GROUP_CONCAT(l.name SEPARATOR ', ') AS languages 
                         FROM application a 
