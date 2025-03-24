@@ -8,6 +8,7 @@
 </head>
 <body>
     <div class="form-container">
+
         <h2>Форма регистрации</h2>
         <?php
         if (isset($_COOKIE['errors'])) {
@@ -66,7 +67,7 @@
                 <label for="contract">С контрактом ознакомлен(а)</label>
             </div>
             <div class="form-group">
-                <button type="submit">Сохранить</button>
+                <button type="submit">Отправить</button>
             </div>
         </form>
     </div>
