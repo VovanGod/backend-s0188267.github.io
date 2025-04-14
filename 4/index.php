@@ -215,14 +215,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $application_id = $db->lastInsertId();
     $stmt_insert = $db->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
     foreach ($languages as $language_id) {
-      $stmt_insert->execute([$application_id, $language_id]);
+        $stmt_insert->execute([$application_id, $language_id]);
     }
 
+    // Очищаем куки с значениями полей
+    foreach ($fields as $field) {
+        setcookie($field . '_value', '', time() - 3600);
+    }
     setcookie('save', '1', time() + 24 * 60 * 60);
     header('Location: index.php?save=1');
     exit();
-  } catch (PDOException $e) {
-    die('Ошибка сохранения: ' . $e->getMessage());
-  }
+    } catch (PDOException $e) {
+        die('Ошибка сохранения: ' . $e->getMessage());
+    }
 }
 ?>

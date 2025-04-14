@@ -199,3 +199,16 @@ input[type="submit"]:hover {
         gap: 10px;
     }
 }
+
+
+.messages {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 5px;
+}
+
+.message {
+    margin: 5px 0;
+}
