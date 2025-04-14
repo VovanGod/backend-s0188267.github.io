@@ -3,7 +3,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
 $user = 'u68609';
 $pass = '1793514';
-$db = new PDO('mysql:host=localhost;dbname=u68606', $user, $pass,
+$db = new PDO('mysql:host=localhost;dbname=u68609', $user, $pass,
   [PDO::ATTR_PERSISTENT => true, PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
 function getLangs($db){
