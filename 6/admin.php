@@ -15,26 +15,32 @@ try {
     die('Ошибка подключения: ' . $e->getMessage());
 }
 
-// Проверка авторизации
+// Проверка HTTP-авторизации
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
     header('WWW-Authenticate: Basic realm="Admin Panel"');
     header('HTTP/1.0 401 Unauthorized');
     echo '<h1>Требуется авторизация</h1>';
-    echo '<p>Используйте логин: <strong>admin</strong>, пароль: <strong>12345</strong></p>';
     exit();
 }
 
 $login = $_SERVER['PHP_AUTH_USER'];
 $password = $_SERVER['PHP_AUTH_PW'];
 
-// Упрощенная проверка (можно заменить на проверку из БД)
-if ($login !== 'admin' || $password !== '12345') {
-    header('WWW-Authenticate: Basic realm="Admin Panel"');
-    header('HTTP/1.0 401 Unauthorized');
-    echo '<h1>Ошибка авторизации</h1>';
-    echo '<p>Неверный логин или пароль. Попробуйте снова.</p>';
-    echo '<p>Логин: <strong>admin</strong>, пароль: <strong>12345</strong></p>';
-    exit();
+// Проверка логина и пароля в БД
+try {
+    $stmt = $db->prepare("SELECT password_hash FROM admins WHERE login = ?");
+    $stmt->execute([$login]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$admin || !password_verify($password, $admin['password_hash'])) {
+        header('WWW-Authenticate: Basic realm="Admin Panel"');
+        header('HTTP/1.0 401 Unauthorized');
+        echo '<h1>Ошибка авторизации</h1>';
+        echo '<p>Неверный логин или пароль.</p>';
+        exit();
+    }
+} catch (PDOException $e) {
+    die('Ошибка при проверке авторизации: ' . $e->getMessage());
 }
 
 $_SESSION['admin_auth'] = true;
