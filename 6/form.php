@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <title>Задание 5</title>
+    <title>Задание 6</title>
 </head>
 <body>
-    <!-- Кнопки авторизации в правом верхнем углу -->
     <div class="auth-buttons">
         <?php if (!empty($_SESSION['login'])): ?>
             <input type="button" value="Выйти" onclick="location.href='logout.php'" class="auth-btn">
@@ -16,7 +15,6 @@
         <?php endif; ?>
     </div>
 
-    <!-- Блок сгенерированных учетных данных (показывается один раз после регистрации) -->
     <?php if (!empty($_SESSION['generated_login']) && !empty($_SESSION['generated_password']) && empty($_SESSION['login'])): ?>
         <div class="credentials">
             <h3>Ваши учетные данные:</h3>
@@ -30,11 +28,9 @@
         ?>
     <?php endif; ?>
 
-    <!-- Основная форма -->
     <form action="index.php" method="POST">
         <h1>Форма</h1>
 
-        <!-- Поле ФИО -->
         <div class="form-group">
             <label for="full_name">ФИО:</label>
             <input type="text" id="full_name" name="full_name" 
@@ -47,7 +43,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- Поле Телефон -->
         <div class="form-group">
             <label for="phone">Телефон:</label>
             <input type="tel" id="phone" name="phone" 
@@ -60,7 +55,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- Поле Email -->
         <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" 
@@ -73,7 +67,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- Поле Дата рождения -->
         <div class="form-group">
             <label>Дата рождения:</label>
             <div class="date-fields">
@@ -98,7 +91,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- Поле Пол -->
         <div class="form-group">
             <label>Пол:</label>
             <div class="gender-options">
@@ -120,7 +112,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- Поле Языки программирования -->
         <div class="form-group">
             <label for="languages">Любимые языки программирования:</label>
             <select id="languages" name="languages[]" multiple 
@@ -137,7 +128,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- Поле Биография -->
         <div class="form-group">
             <label for="biography">Биография:</label>
             <textarea id="biography" name="biography" 
@@ -150,7 +140,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- Поле Согласие -->
         <div class="form-group agreement-field">
             <label>
                 <input type="checkbox" name="agreement" 
@@ -163,7 +152,6 @@
             <?php endif; ?>
         </div>
 
-        <!-- Кнопка отправки формы -->
         <div class="form-actions">
             <input type="submit" value="<?php 
                 echo !empty($_SESSION['login']) ? 'Обновить данные' : 'Сохранить'; 
