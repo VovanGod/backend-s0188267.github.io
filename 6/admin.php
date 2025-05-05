@@ -2,6 +2,7 @@
 session_start();
 header('Content-Type: text/html; charset=UTF-8');
 
+// Подключение к базе данных
 $user = 'u68609';
 $pass = '1793514';
 
@@ -14,32 +15,35 @@ try {
     die('Ошибка подключения: ' . $e->getMessage());
 }
 
-// Проверка HTTP-авторизации
+// Проверка авторизации
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
     header('WWW-Authenticate: Basic realm="Admin Panel"');
     header('HTTP/1.0 401 Unauthorized');
-    echo 'Требуется авторизация';
+    echo '<h1>Требуется авторизация</h1>';
+    echo '<p>Используйте логин: <strong>admin</strong>, пароль: <strong>12345</strong></p>';
     exit();
-} else {
-    $login = $_SERVER['PHP_AUTH_USER'];
-    $password = $_SERVER['PHP_AUTH_PW'];
-    
-    try {
-        $stmt = $db->prepare("SELECT id, login, password_hash FROM admins WHERE login = ?");
-        $stmt->execute([$login]);
-        $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-        if (!$admin || !password_verify($password, $admin['password_hash'])) {
-            header('WWW-Authenticate: Basic realm="Admin Panel"');
-            header('HTTP/1.0 401 Unauthorized');
-            echo 'Неверные учетные данные';
-            exit();
-        }
-        
-        $_SESSION['admin_id'] = $admin['id'];
-    } catch (PDOException $e) {
-        die('Ошибка при проверке авторизации: ' . $e->getMessage());
-    }
+}
+
+$login = $_SERVER['PHP_AUTH_USER'];
+$password = $_SERVER['PHP_AUTH_PW'];
+
+// Упрощенная проверка (можно заменить на проверку из БД)
+if ($login !== 'admin' || $password !== '12345') {
+    header('WWW-Authenticate: Basic realm="Admin Panel"');
+    header('HTTP/1.0 401 Unauthorized');
+    echo '<h1>Ошибка авторизации</h1>';
+    echo '<p>Неверный логин или пароль. Попробуйте снова.</p>';
+    echo '<p>Логин: <strong>admin</strong>, пароль: <strong>12345</strong></p>';
+    exit();
+}
+
+$_SESSION['admin_auth'] = true;
+
+// Выход из админки
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header('Location: index.php');
+    exit();
 }
 
 // Функции для работы с данными
@@ -88,7 +92,6 @@ if (isset($_GET['delete'])) {
     
     try {
         $db->beginTransaction();
-        
         $stmt = $db->prepare("DELETE FROM application_languages WHERE application_id = ?");
         $stmt->execute([$id]);
         
@@ -97,7 +100,6 @@ if (isset($_GET['delete'])) {
         
         $stmt = $db->prepare("DELETE FROM applications WHERE id = ?");
         $stmt->execute([$id]);
-        
         $db->commit();
         
         header('Location: admin.php');
@@ -108,6 +110,7 @@ if (isset($_GET['delete'])) {
     }
 }
 
+// Редактирование заявки
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_application'])) {
     $id = $_POST['id'];
     $full_name = trim($_POST['full_name']);
@@ -121,7 +124,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_application'])) {
     
     try {
         $db->beginTransaction();
-        
         $stmt = $db->prepare("
             UPDATE applications 
             SET full_name = ?, phone = ?, email = ?, birth_date = ?, 
@@ -139,7 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_application'])) {
         }
         
         $db->commit();
-        
         header("Location: admin.php");
         exit();
     } catch (PDOException $e) {
@@ -152,7 +153,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_application'])) {
 $edit_data = null;
 if (isset($_GET['edit'])) {
     $id = $_GET['edit'];
-    
     $stmt = $db->prepare("
         SELECT a.id, a.full_name, a.phone, a.email, a.birth_date, 
                a.gender, a.biography, a.agreement
@@ -162,19 +162,15 @@ if (isset($_GET['edit'])) {
     $stmt->execute([$id]);
     $edit_data = $stmt->fetch(PDO::FETCH_ASSOC);
     
-    if (!$edit_data) {
-        header('Location: admin.php');
-        exit();
+    if ($edit_data) {
+        $edit_data['languages'] = array_column(getApplicationLanguages($db, $id), 'id');
     }
-    
-    $edit_data['languages'] = array_column(getApplicationLanguages($db, $id), 'id');
 }
 
 $applications = getAllApplications($db);
 $statistics = getLanguagesStatistics($db);
 $all_languages = getAllLanguages($db);
 ?>
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -185,7 +181,10 @@ $all_languages = getAllLanguages($db);
 </head>
 <body>
     <div class="container">
-        <h1>Административная панель</h1>
+        <div class="admin-header">
+            <h1>Административная панель</h1>
+            <a href="admin.php?logout=1" class="btn btn-logout">Выйти</a>
+        </div>
         
         <?php if ($edit_data): ?>
             <div class="edit-form">
@@ -274,10 +273,7 @@ $all_languages = getAllLanguages($db);
                         <td><?= htmlspecialchars($app['birth_date']) ?></td>
                         <td><?= $app['gender'] == 'male' ? 'Мужской' : 'Женский' ?></td>
                         <td>
-                            <?php 
-                                $langs = getApplicationLanguages($db, $app['id']);
-                                echo htmlspecialchars(implode(', ', array_column($langs, 'name')));
-                            ?>
+                            <?= htmlspecialchars(implode(', ', array_column(getApplicationLanguages($db, $app['id']), 'name'))) ?>
                         </td>
                         <td class="actions">
                             <a href="admin.php?edit=<?= $app['id'] ?>">Редактировать</a>
