@@ -5,7 +5,6 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
 header('X-XSS-Protection: 1; mode=block');
 
-// Подключение к базе данных
 $user = 'u68609';
 $pass = '1793514';
 
@@ -24,7 +23,6 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Проверка HTTP-авторизации
 if (!isset($_SERVER['PHP_AUTH_USER'])) {
     header('WWW-Authenticate: Basic realm="Admin Panel"');
     header('HTTP/1.0 401 Unauthorized');
@@ -35,7 +33,6 @@ if (!isset($_SERVER['PHP_AUTH_USER'])) {
 $login = $_SERVER['PHP_AUTH_USER'];
 $password = $_SERVER['PHP_AUTH_PW'];
 
-// Проверка логина и пароля в БД
 try {
     $stmt = $db->prepare("SELECT password_hash FROM admins WHERE login = ?");
     $stmt->execute([$login]);
@@ -62,7 +59,6 @@ if (isset($_GET['logout'])) {
     exit();
 }
 
-// Функции для работы с данными
 function getAllApplications($db) {
     $stmt = $db->query("
         SELECT a.id, a.full_name, a.phone, a.email, a.birth_date, 
@@ -102,7 +98,6 @@ function getAllLanguages($db) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// Обработка действий
 if (isset($_GET['delete'])) {
     if (!isset($_GET['csrf_token']) || $_GET['csrf_token'] !== $_SESSION['csrf_token']) {
         die('Неверный CSRF-токен');
@@ -134,7 +129,6 @@ if (isset($_GET['delete'])) {
     }
 }
 
-// Редактирование заявки
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_application'])) {
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die('Неверный CSRF-токен');
@@ -182,7 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit_application'])) {
     }
 }
 
-// Получение данных для редактирования
 $edit_data = null;
 if (isset($_GET['edit'])) {
     $id = filter_input(INPUT_GET, 'edit', FILTER_VALIDATE_INT);
