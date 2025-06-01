@@ -22,7 +22,7 @@
   </label> <br/>
   <label> 
     Пароль <br/>
-    <input name="password" />
+    <input type="password" name="password" />
   </label> <br/>
   
   <input class="login_button" type="submit" value="Войти" />

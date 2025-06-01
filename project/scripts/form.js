@@ -21,8 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
           showErrors(errors);
           return;
         }
-  
-        // Подготовка данных
+
         const formData = new FormData();
         for (const element of form.elements) {
           if (!element.name || element.type === 'submit') continue;
