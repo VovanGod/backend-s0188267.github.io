@@ -1,6 +1,11 @@
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('myform');
     const messagesContainer = document.querySelector('.form-messages');
+    const submitBtn = form.querySelector('#submit-btn');
+
+    if (document.querySelector('.auth-btn') && document.querySelector('.auth-btn').textContent === 'Выйти') {
+      submitBtn.value = 'Обновить данные';
+  }
   
     if (!form || !messagesContainer) {
       console.error('Форма или контейнер сообщений не найдены.');
@@ -54,6 +59,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (result.success) {
           clearErrors();
           showSuccess(result);
+
+          if (document.querySelector('.auth-btn') && document.querySelector('.auth-btn').textContent === 'Выйти') {
+            messagesContainer.innerHTML = `
+                <div class="success-message">
+                    Данные успешно обновлены!
+                </div>
+            `;
+        }
         } else {
           showErrors(result.errors || {});
         }
