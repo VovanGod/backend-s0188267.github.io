@@ -1,83 +1,92 @@
 <?php
+// scripts/db.php
 
 $db = null;
 
 function db_connect() {
     global $db;
-    
-    if ($db === null) {
-        $user = 'u68609';
-        $pass = '1793514';
-        
-        try {
-            $db = new PDO('mysql:host=localhost;dbname=u68609', $user, $pass, 
-                [
-                    PDO::ATTR_PERSISTENT => true,
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_EMULATE_PREPARES => false,
-                    PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4",
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-                ]
-            );
-        } catch (PDOException $e) {
-            error_log("Database error: " . $e->getMessage());
-            die("Ошибка подключения к БД. Попробуйте позже.");
-        }
+    if ($db !== null) return $db;
+
+    $user = 'u68609';
+    $pass = '1793514';
+    $dsn = 'mysql:host=localhost;dbname=u68609;charset=utf8mb4';
+
+    try {
+        $db = new PDO($dsn, $user, $pass, [
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+        ]);
+        return $db;
+    } catch (PDOException $e) {
+        error_log("DB Connection Error: " . $e->getMessage());
+        throw new Exception("Ошибка подключения к базе данных.");
     }
-    return $db;
 }
 
-function db_row($stmt) {
-    return $stmt->fetch();
-}
-
-function db_query($query) {
-    global $db;
-    $args = func_get_args();
-    $query = array_shift($args);
+function db_query($query, ...$params) {
+    $db = db_connect();
     $stmt = $db->prepare($query);
-    $stmt->execute($args);
-    $result = [];
-    while ($row = $stmt->fetch()) {
-        if (isset($row['id'])) {
-            $result[$row['id']] = $row;
-        } else {
-            $result[] = $row;
-        }
-    }
-    return $result;
+    $stmt->execute($params);
+    return $stmt;
 }
 
-function db_command($query) {
-    global $db;
-    $args = func_get_args();
-    $query = array_shift($args);
-    $stmt = $db->prepare($query);
-    return $stmt->execute($args);
+function db_row($query, ...$params) {
+    return db_query($query, ...$params)->fetch();
+}
+
+function db_result($query, ...$params) {
+    $row = db_row($query, ...$params);
+    return $row ? reset($row) : null;
+}
+
+function db_all($query, ...$params) {
+    return db_query($query, ...$params)->fetchAll();
+}
+
+function db_command($query, ...$params) {
+    return db_query($query, ...$params)->rowCount();
 }
 
 function db_insert_id() {
-    global $db;
-    return $db->lastInsertId();
+    return db_connect()->lastInsertId();
 }
 
-function db_result($query) {
-    $result = db_query($query);
-    return $result ? reset($result[0]) : false;
+function user_login_check($login) {
+$row = db_row("SELECT id FROM users WHERE login = ?", $login);
+return $row !== false;
 }
 
-function admin_login_check($db, $login) {
-    $stmt = $db->prepare("SELECT COUNT(*) FROM admins WHERE login = ?");
-    $stmt->execute([$login]);
-    return $stmt->fetchColumn() > 0;
+function user_password_check($login, $password) {
+$row = db_row("SELECT password_hash FROM users WHERE login = ?", $login);
+return $row && password_verify($password, $row['password_hash']);
 }
 
-function admin_password_check($db, $login, $password) {
-    $stmt = $db->prepare("SELECT password FROM admins WHERE login = ?");
-    $stmt->execute([$login]);
-    $storedPassword = $stmt->fetchColumn();
-
-    return password_verify($password, $storedPassword);
+// Проверка логина администратора
+function admin_login_check($login) {
+    $row = db_row("SELECT id FROM admins WHERE login = ?", $login);
+    return $row !== false;
 }
 
-db_connect();
+// Проверка пароля администратора
+function admin_password_check($login, $password) {
+    $row = db_row("SELECT password_hash FROM admins WHERE login = ?", $login);
+    return $row && password_verify($password, $row['password_hash']);
+}
+
+function getLangs() {
+    $db = db_connect();
+    $stmt = $db->query("SELECT id, name FROM programming_languages");
+
+    $langs = [];
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        $langs[] = [
+            'id' => $row['id'],
+            'name' => $row['name']
+        ];
+    }
+
+    return $langs;
+}

@@ -1,71 +1,93 @@
 <?php
+require_once __DIR__ . '/db.php';
 
 function init($request = array(), $urlconf = array()) {
-  global $db;
-  $response = array();
-  $template = 'page';
-  $c = array();
-  $q = isset($request['url']) ? $request['url'] : '';
-  $method = isset($request['method']) ? $request['method'] : 'get';
-  foreach ($urlconf as $url => $r) {
-    $matches = array();
-    if ($url == '' || $url[0] != '/') {
-      if ($url != $q) {
-        continue;
-      }
-    }
-    else {
-      if (!preg_match_all($url, $q, $matches)) {
-        continue;
-      }
-    }
-    if (isset($r['auth'])) {
-      require_once($r['auth'] . '.php');
-      $auth = auth($request, $r);
-      if ($auth) {
-        return $auth;
-      }
-    }
-
-    if (isset($r['tpl'])) {
-      $template = $r['tpl'];
-    }
-
-    if (!isset($r['module'])) {
-      continue;
-    }
-    require_once($r['module'] . '.php');
-    $func = sprintf('%s_%s', $r['module'], $method);
-    if (!function_exists($func)) {
-      continue;
-    }
-    $params = array('request' => $request, 'db' => $db);
-    array_shift($matches);
-    foreach ($matches as $key => $match) {
-      $params[$key] = $match[0];
-    }
-    if ($result = call_user_func_array($func, $params)) {
-      if (is_array($result)) {
-        $response = array_merge($response, $result);
-        if (!empty($response['headers'])) {
-          return $response;
+    global $conf;
+    
+    try {
+        $db = db_connect();
+        if (!$db) {
+            throw new Exception('Database connection failed');
         }
-      }
-      else {
-        $c['#content'][$r['module']] = $result;
-      }
+    } catch (Exception $e) {
+        error_log('Init DB Error: ' . $e->getMessage());
+        if ($request['is_ajax'] ?? false) {
+            return [
+                'headers' => ['Content-Type' => 'application/json'],
+                'entity' => ['success' => false, 'error' => 'Database error']
+            ];
+        }
+        return [
+            'headers' => ['HTTP/1.1 500 Internal Server Error'],
+            'entity' => 'Database connection error'
+        ];
     }
-  }
-  if (!empty($c)) {
-    $c['#request'] = $request;
-    $response['entity'] = theme($template, $c);
-  }
-  else {
-    $response = not_found();
-  }
-  $response['headers']['Content-Type'] = 'text/html; charset=' . conf('charset');
 
-  return $response;
+    $response = array();
+    $template = 'page';
+    $c = array();
+
+    $q = $request['url'] ?? '';
+    $method = strtolower($request['method'] ?? 'get');
+
+    foreach ($urlconf as $url => $r) {
+        $matches = array();
+
+        if ($url == '' || $url[0] != '/') {
+            if ($url != $q) continue;
+        } else {
+            if (!preg_match($url, $q, $matches)) continue;
+        }
+
+        if (!empty($r['auth'])) {
+            require_once "./modules/{$r['auth']}.php";
+            if (function_exists('auth')) {
+                $auth_response = auth($request, $r);
+                if ($auth_response) return $auth_response;
+            }
+        }
+
+        if (empty($r['module'])) continue;
+        require_once "./modules/{$r['module']}.php";
+
+        $func = "{$r['module']}_{$method}";
+        if (!function_exists($func)) continue;
+
+        $params = [$request];
+        if (isset($matches[1])) {
+            $params[] = $matches[1];
+        }
+
+        $result = call_user_func_array($func, $params);
+
+   if (is_array($result)) {
+    // Если front_post вернул JSON, сразу вернуть (AJAX-запрос)
+    if ($request['is_ajax'] ?? false) {
+        return [
+            'headers' => ['Content-Type' => 'application/json'],
+            'entity' => $result
+        ];
+    }
+
+    // Иначе продолжить как обычно (например, front_get)
+    if (!empty($result['headers'])) {
+        return $result;
+    }
+    $response = array_merge($response, $result);
+} else {
+    $c['#content'][$r['module']] = $result;
+}
+    }
+
+    if (!empty($c)) {
+        $c['#request'] = $request;
+        $response['entity'] = theme($template, $c);
+    } else {
+        $response = not_found();
+    }
+
+    $response['headers']['Content-Type'] = 'text/html; charset=' . conf('charset');
+    return $response;
 }
 
 function conf($key) {
