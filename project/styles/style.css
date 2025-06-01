@@ -18,7 +18,7 @@ body{
 
 .pricing {
     background-color: #ffffff;
-    padding: 150px 0 0 0;
+    padding: 150px 0 50px 0;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 
@@ -42,7 +42,7 @@ body{
     gap: 10px;
     justify-content: center;
     justify-items: center;
-    margin-top: 84px;
+    margin-top: 40px;
   }
   
   .pricing-plan {
@@ -75,7 +75,7 @@ body{
 
     .rubles {
         position: absolute;
-        right: 26px;
+        right: 90px;
         top: -14px;
         color: rgb(5, 12, 51);
         font-size: 28px;
@@ -1009,20 +1009,21 @@ select[multiple] option:checked {
     background: #000;
     border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    padding: 8px 22px;
+    padding: 12px 35px;
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.3s ease;
-    font-size: 14px;
+    font-size: 16px;
     float: right;
     position: fixed;
-    top: 25px;
-    right: 25px;
+    top: 30px;
+    right: 30px;
 }
 
 .auth-btn:hover {
     background-color: rgba(0, 0, 0, 0.2);
     color: #000;
+    text-decoration: none;
 }
 
 .error-text {
