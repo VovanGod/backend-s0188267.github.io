@@ -14,10 +14,10 @@ function front_get($request) {
     if (!empty($_SESSION['login'])) {
         $db = db_connect();
         $stmt = $db->prepare("
-            SELECT a.*, GROUP_CONCAT(al.language_id) as languages
+            SELECT u.*, a.*, GROUP_CONCAT(al.language_id) as languages
             FROM users u
-            JOIN user_applications ua ON ua.user_id = u.id
-            JOIN applications a ON a.id = ua.application_id
+            LEFT JOIN user_applications ua ON ua.user_id = u.id
+            LEFT JOIN applications a ON a.id = ua.application_id
             LEFT JOIN application_languages al ON al.application_id = a.id
             WHERE u.login = ?
             GROUP BY a.id
@@ -27,19 +27,19 @@ function front_get($request) {
 
         if ($row) {
             $values = [
-                'fio' => $row['full_name'],
-                'phone' => $row['phone'],
-                'email' => $row['email'],
-                'birth_day' => date('d', strtotime($row['birth_date'])),
-                'birth_month' => date('m', strtotime($row['birth_date'])),
-                'birth_year' => date('Y', strtotime($row['birth_date'])),
-                'gender' => $row['gender'],
-                'biography' => $row['biography'],
-                'languages' => explode(',', $row['languages']),
-                'agreement' => $row['agreement']
+                'fio' => $row['full_name'] ?? '',
+                'phone' => $row['phone'] ?? '',
+                'email' => $row['email'] ?? '',
+                'birth_day' => !empty($row['birth_date']) ? date('d', strtotime($row['birth_date'])) : '',
+                'birth_month' => !empty($row['birth_date']) ? date('m', strtotime($row['birth_date'])) : '',
+                'birth_year' => !empty($row['birth_date']) ? date('Y', strtotime($row['birth_date'])) : '',
+                'gender' => $row['gender'] ?? '',
+                'biography' => $row['biography'] ?? '',
+                'languages' => !empty($row['languages']) ? explode(',', $row['languages']) : [],
+                'agreement' => isset($row['agreement']) ? (bool)$row['agreement'] : false
             ];
         }
-   } else {
+    } else {
         foreach ($all_fields as $field) {
             $errors[$field] = !empty($_COOKIE["{$field}_error"])
                 ? getErrorMessage($field, $_COOKIE["{$field}_error"])
@@ -133,73 +133,113 @@ function front_post($request) {
         }
     }
 
-    foreach ($values as $key => $val) {
-        if ($key === 'languages') {
-            $langs_str = !empty($val) && is_array($val) ? implode(',', $val) : '';
-            setcookie("{$key}_value", $langs_str, time() + 365 * 24 * 3600, '/');
-        } else {
-            setcookie("{$key}_value", $val, time() + 365 * 24 * 3600, '/');
-        }
-    }
     if (!empty($errors)) {
-        foreach ($errors as $key => $_) {
-            setcookie("{$key}_error", 1, time() + 60, '/');
+        if (!$is_ajax) {
+            foreach ($values as $key => $val) {
+                if ($key === 'languages') {
+                    $langs_str = !empty($val) && is_array($val) ? implode(',', $val) : '';
+                    setcookie("{$key}_value", $langs_str, time() + 365 * 24 * 3600, '/');
+                } else {
+                    setcookie("{$key}_value", $val, time() + 365 * 24 * 3600, '/');
+                }
+            }
+            foreach ($errors as $key => $_) {
+                setcookie("{$key}_error", 1, time() + 60, '/');
+            }
         }
-
-        $first_error_field = array_key_first($errors);
 
         return [
             'success' => false,
             'errors' => $errors,
-            'scroll_to_first_error' => $first_error_field
+            'scroll_to_first_error' => array_key_first($errors)
         ];
     }
 
     try {
         $db->beginTransaction();
-
         $birth_date = sprintf('%04d-%02d-%02d', $values['birth_year'], $values['birth_month'], $values['birth_day']);
 
-        $stmt = $db->prepare("INSERT INTO applications 
-            (full_name, phone, email, birth_date, gender, biography, agreement) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([
-            $values['fio'],
-            $values['phone'],
-            $values['email'],
-            $birth_date,
-            $values['gender'],
-            $values['biography'],
-            $values['agreement']
-        ]);
-        $app_id = $db->lastInsertId();
+        if (!empty($_SESSION['login'])) {
+            $user = db_row("SELECT u.id, ua.application_id FROM users u 
+                          LEFT JOIN user_applications ua ON ua.user_id = u.id 
+                          WHERE u.login = ?", $_SESSION['login']);
+            
+            if ($user) {
+                $app_id = $user['application_id'];
 
-        $stmt = $db->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
-        foreach ($values['languages'] as $lang_id) {
-            $stmt->execute([$app_id, $lang_id]);
+                $stmt = $db->prepare("UPDATE applications SET 
+                    full_name = ?, 
+                    phone = ?, 
+                    email = ?, 
+                    birth_date = ?, 
+                    gender = ?, 
+                    biography = ?, 
+                    agreement = ? 
+                    WHERE id = ?");
+                $stmt->execute([
+                    $values['fio'],
+                    $values['phone'],
+                    $values['email'],
+                    $birth_date,
+                    $values['gender'],
+                    $values['biography'],
+                    $values['agreement'],
+                    $app_id
+                ]);
+
+                $stmt = $db->prepare("DELETE FROM application_languages WHERE application_id = ?");
+                $stmt->execute([$app_id]);
+
+                $stmt = $db->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
+                foreach ($values['languages'] as $lang_id) {
+                    $stmt->execute([$app_id, $lang_id]);
+                }
+                
+                $db->commit();
+                
+                return ['success' => true, 'message' => 'Данные успешно обновлены'];
+            }
+        } else {
+            $stmt = $db->prepare("INSERT INTO applications 
+                (full_name, phone, email, birth_date, gender, biography, agreement) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([
+                $values['fio'],
+                $values['phone'],
+                $values['email'],
+                $birth_date,
+                $values['gender'],
+                $values['biography'],
+                $values['agreement']
+            ]);
+            $app_id = $db->lastInsertId();
+
+            $stmt = $db->prepare("INSERT INTO application_languages (application_id, language_id) VALUES (?, ?)");
+            foreach ($values['languages'] as $lang_id) {
+                $stmt->execute([$app_id, $lang_id]);
+            }
+
+            $login = 'user_' . bin2hex(random_bytes(3));
+            $password = bin2hex(random_bytes(4));
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+
+            $stmt = $db->prepare("INSERT INTO users (login, password_hash) VALUES (?, ?)");
+            $stmt->execute([$login, $hash]);
+
+            $user_id = $db->lastInsertId();
+            $stmt = $db->prepare("INSERT INTO user_applications (user_id, application_id) VALUES (?, ?)");
+            $stmt->execute([$user_id, $app_id]);
+
+            $db->commit();
+
+            if (!$is_ajax) {
+                setcookie('save', 1, time() + 3600, '/');
+                setcookie('login', $login, time() + 3600, '/');
+                setcookie('password', $password, time() + 3600, '/');
+            }
+
+            return ['success' => true, 'login' => $login, 'password' => $password];
         }
-
-        $login = 'user_' . bin2hex(random_bytes(3));
-        $password = bin2hex(random_bytes(4));
-        $hash = password_hash($password, PASSWORD_DEFAULT);
-
-        $stmt = $db->prepare("INSERT INTO users (login, password_hash) VALUES (?, ?)");
-        $stmt->execute([$login, $hash]);
-
-        $user_id = $db->lastInsertId();
-        $stmt = $db->prepare("INSERT INTO user_applications (user_id, application_id) VALUES (?, ?)");
-        $stmt->execute([$user_id, $app_id]);
-
-        $db->commit();
-
-        if (!$is_ajax) {
-            setcookie('save', 1, time() + 3600, '/');
-            setcookie('login', $login, time() + 3600, '/');
-            setcookie('password', $password, time() + 3600, '/');
-        }
-
-        return ['success' => true, 'login' => $login, 'password' => $password];
-
     } catch (PDOException $e) {
         $db->rollBack();
         error_log('DB Error: ' . $e->getMessage());
