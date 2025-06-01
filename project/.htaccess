@@ -1,5 +1,6 @@
 <IfModule mod_rewrite.c>
-  RewriteEngine on
+  RewriteEngine On
+  RewriteBase /backend-s0188267.github.io/project/
 
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
