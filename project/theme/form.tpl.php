@@ -341,7 +341,7 @@
         <h2 class="block-name col-12 order-0 mb-3 px-3"> Тарифы </h2>
         <div class="b-t row d-flex col-12 mx-0 px-0 justify-content-around">
 
-          <div class="col-12 col-md-4 order-2 order-md-2 p-0">
+          <div class="t-2 col-12 col-md-4 order-1 order-md-1 p-0">
             <div class="t-part row d-flex justify-content-around m-1 p-3">
               <div class="t-body col-12 p-0">
                 <h3 class="col-12 mb-3 p-0"> Бизнес </h3>
@@ -551,7 +551,6 @@
 
                 <div class="slide p-2 col-12 col-md-8">
                   <img class="mb-4" alt="rev-logo-1" src="./styles/img/logo_0.png">
-                  <div class="wrap">
                   <div class="slide-body">
                     Долгие поиски единственного и неповторимого мастера на многострадальный сайт www.cielparfum.com, 
                     который был собран крайне некомпетентным программистом и раз в месяц стабильно грозил погибнуть,
@@ -569,7 +568,6 @@
                   <div class="slide-bot">
                     С уважением, Наталья Сушкова руководитель Отдела веб-проектов Группы компаний «Си Эль парфюм» 
                     <a href="http://www.cielparfum.com/" tabindex="0">http://www.cielparfum.com/</a>
-                  </div>
                   </div>
                 </div>
                   
