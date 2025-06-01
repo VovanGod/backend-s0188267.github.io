@@ -336,67 +336,68 @@
 
 
 
-    <div class="b-tarif col-12 row d-flex justify-content-around px-0 mx-0 pb-5 pt-3" id="tariffs">
-      <div class="container">
-        <h2 class="block-name col-12 order-0 mb-3 px-3"> Тарифы </h2>
-        <div class="b-t row d-flex col-12 mx-0 px-0 justify-content-around">
-
-          <div class="t-2 col-12 col-md-4 order-1 order-md-1 p-0">
-            <div class="t-part row d-flex justify-content-around m-1 p-3">
-              <div class="t-body col-12 p-0">
-                <h3 class="col-12 mb-3 p-0"> Бизнес </h3>
-                <ul class="my-3">
-                  <li> Консультации и работы по SEO </li>
-                  <li> Услуги дизайнера </li>
-                  <li> Высокое время реакции - до 2 рабочих дней </li>
-                  <li> Неиспользованные оплаченные часы не переносятся </li>
-                  <li> Предоплата от 30 000 рублей в месяц </li>
-                </ul>
-              </div>
-              <div class="col-12 t-button mx-0"> <button > СВЯЖИТЕСЬ С НАМИ! </button> </div>
+    <section id="pricing" class="pricing">
+        <h2>Тарифы</h2>
+        <div class="pricing-grid">
+          <div class="pricing-plan">
+            <h3>Стартовый</h3>
+            <div class="price">
+                2000
+                <div class="rubles">₽</div>
             </div>
-          </div>
-
-          <div class="t-2 col-12 col-md-4 order-1 order-md-1 p-0">
-            <div class="t-part-b row d-flex justify-content-around mx-1 mt-md-4 p-3">
-              
-              <div class="t-body col-12 p-0">
-                <h3 class="col-12 mb-3 p-0"> Стартовый </h3>
-                <ul class="my-3">
-                  <li> Консультации и работы по SEO </li>
-                  <li> Услуги дизайнера </li>
-                  <li> Неиспользованные оплаченные часы переносятся на следующий месяц </li>
-                  <li> Предоплата от 6 000 рублей в месяц </li>
-                </ul>
-              </div>
-              <div class="col-12 t-button mx-0"> <button id="t-btn-b1"> СВЯЖИТЕСЬ С НАМИ! </button> </div>
+            <div class="atHour">
+                в час
             </div>
+            <div class="line"></div>
+            <ul>
+              <li>Консультации и работы по SEO</li>
+              <li>Услуги дизайнера</li>
+              <li>Обычное время реакции - до 7 рабочих дней</li>
+              <li>Неиспользованные оплаченные часы переносятся на следующий месяц</li>
+              <li>Предоплата от 6 000 рублей в месяц</li>
+            </ul>
+            <a href="#myform" class="btn">Выбрать</a>
           </div>
-
-          <div class="t-2 col-12 col-md-4 order-3 order-md-3 p-0">
-            <div class="t-part-b row d-flex justify-content-around mx-1 mt-md-4 p-3">
-              
-              <div class="t-body col-12 p-0">
-                <h3 class="col-12 mb-3 p-0"> VIP </h3>
-                <ul class="my-3">
-                  <li> Консультации и работы по SEO </li>
-                  <li> Услуги дизайнера </li>
-                  <li> Максимальное время реакции - в день обращения </li>
-                  <li> Неиспользованные оплаченные часы не переносятся </li>
-                  <li> Предоплата от 270 000 рублей в месяц </li>
-                </ul>
-              </div>
-              <div class="col-12 t-button mx-0"> <button id="t-btn-b2"> СВЯЖИТЕСЬ С НАМИ! </button> </div>
+          <div class="pricing-plan">
+            <h3>Бизнес</h3>
+            <div class="price">
+                1800
+                <div class="rubles">₽</div>
             </div>
+            <div class="atHour">
+                в час
+            </div>
+            <div class="line"></div>
+            <ul>
+              <li>Консультации и работы по SEO</li>
+              <li>Услуги дизайнера</li>
+              <li>Высокое время реакции - до 2 рабочих дней</li>
+              <li>Неиспользованные оплаченные часы не переносятся на следующий месяц</li>
+              <li>Предоплата от 30 000 рублей в месяц</li>
+            </ul>
+            <a href="#myform" class="btn">Выбрать</a>
           </div>
-
+          <div class="pricing-plan">
+            <h3>VIP</h3>
+            <div class="price">
+                2000
+                <div class="rubles">₽</div>
+            </div>
+            <div class="atHour">
+                в час
+            </div>
+            <div class="line"></div>
+            <ul>
+              <li>Консультации и работы по SEO</li>
+              <li>Услуги дизайнера</li>
+              <li>Максимальное время реакции - в день обращения</li>
+              <li>Неиспользованные оплаченные часы не переносятся</li>
+              <li>Предоплата от 270 000 рублей в месяц</li>
+            </ul>
+            <a href="#myform" class="btn">Выбрать</a>
+          </div>
         </div>
-        <div class="tariffs-bot-text">
-          <p class="col-12 my-3"> Вам не подходят наши тарифы? Оставьте заявку и мы предложим вам индивидуальные условия! </p>
-          <a href="#myform" class="underlined" id="t-a"> ПОЛУЧИТЬ ИНДИВИДУАЛЬНЫЙ ТАРИФ </a>
-        </div>
-      </div>
-    </div>
+      </section>
 
 
     <div class="b-info-4 container">

@@ -15,6 +15,146 @@ body{
     padding-left: 15px;
     padding-right: 15px;
 }
+
+.pricing {
+    background-color: #ffffff;
+    padding: 150px 0 0 0;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+
+    .line {
+      width: 100%;
+      border: 1px solid rgba(0, 0, 0, 0.2);
+      margin: 20px 0 40px 0;
+    }
+  }
+  
+  .pricing h2 {
+    color: rgb(0, 0, 0);
+    font-size: 42px;
+    font-weight: 700;
+  }
+  
+  .pricing-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    justify-content: center;
+    justify-items: center;
+    margin-top: 84px;
+  }
+  
+  .pricing-plan {
+    background-color: #ffffff;
+    border: 1px solid #e2e2e2;
+    border-radius: 12px;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    padding: 78px 70px 48px 60px;
+  }
+  
+  .pricing-plan:hover {
+    transform: scale(1.03);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.15);
+  }
+  
+  .pricing-plan h3 {
+    color: rgb(241, 77, 52);
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .price {
+    position: relative;
+    color: rgb(5, 12, 51);
+    font-size: 72px;
+    font-weight: 700;
+    line-height: 72px;
+
+    .rubles {
+        position: absolute;
+        right: 26px;
+        top: -14px;
+        color: rgb(5, 12, 51);
+        font-size: 28px;
+        font-weight: 500;
+    }
+  }
+
+  .atHour {
+    color: rgb(5, 12, 51);
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .pricing-plan ul {
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
+    align-items: flex-start;
+  }
+  
+  .pricing-plan ul li {
+    color: rgb(5, 12, 51);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: left;
+    max-width: 239px;
+  }
+  
+  .pricing-plan ul li::before {
+    content: '✔';
+    color: #f04e23;
+    margin-right: 10px;
+  }
+  
+  .pricing-plan a.btn {
+    display: inline-block;
+    text-align: center;
+    width: 100%;
+    padding: 1rem;
+    background-color: #fff;
+    border: 1px solid rgb(241, 77, 52);
+    color: rgb(241, 77, 52);
+    border-radius: 5px;
+    font-weight: bold;
+    text-decoration: none;
+    letter-spacing: 1px;
+    transition: all 0.2s ease-in-out;
+    margin-top: 43px;
+  }
+  
+  .pricing-plan a.btn:hover {
+    background-color: #d13e1b;
+    color: #fff;
+  }
+  
+  .custom-plan {
+    color: rgb(5, 12, 51);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+    max-width: 468px;
+    margin: 0 auto;
+    margin-top: 52px;
+    text-align: center;
+  }
+
+  a.plan {
+    display: block;
+    color: rgb(5, 12, 51);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 6%;
+    text-align: center;
+    text-decoration: underline;
+    text-transform: uppercase;
+    margin-top: 26px;
+    transition: all 0.1s ease-in;
+  }
+  
 .b-main{
     background-color: rgb(255, 255, 255);
     padding-top: 70px;
