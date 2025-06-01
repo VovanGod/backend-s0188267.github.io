@@ -23,5 +23,5 @@ if (ini_get("session.use_cookies")) {
 session_destroy();
 
 // Перенаправление на главную
-header('Location: /Web2/project/');
+header('Location: /backend-s0188267.github.io/project/');
 exit;
