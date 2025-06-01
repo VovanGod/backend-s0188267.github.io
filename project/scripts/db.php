@@ -6,11 +6,11 @@ function db_connect() {
     global $db;
     
     if ($db === null) {
-        $user = 'u68606';
-        $pass = '9347178';
+        $user = 'u68609';
+        $pass = '1793514';
         
         try {
-            $db = new PDO('mysql:host=localhost;dbname=u68606', $user, $pass, 
+            $db = new PDO('mysql:host=localhost;dbname=u68609', $user, $pass, 
                 [
                     PDO::ATTR_PERSISTENT => true,
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -39,7 +39,7 @@ function db_query($query) {
     $stmt->execute($args);
     $result = [];
     while ($row = $stmt->fetch()) {
-        if (isset($row['id']) {
+        if (isset($row['id'])) {
             $result[$row['id']] = $row;
         } else {
             $result[] = $row;
@@ -66,5 +66,18 @@ function db_result($query) {
     return $result ? reset($result[0]) : false;
 }
 
-// Автоматическое подключение при первом вызове
+function admin_login_check($db, $login) {
+    $stmt = $db->prepare("SELECT COUNT(*) FROM admins WHERE login = ?");
+    $stmt->execute([$login]);
+    return $stmt->fetchColumn() > 0;
+}
+
+function admin_password_check($db, $login, $password) {
+    $stmt = $db->prepare("SELECT password FROM admins WHERE login = ?");
+    $stmt->execute([$login]);
+    $storedPassword = $stmt->fetchColumn();
+
+    return password_verify($password, $storedPassword);
+}
+
 db_connect();

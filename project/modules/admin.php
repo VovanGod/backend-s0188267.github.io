@@ -1,21 +1,54 @@
 <?php
+require_once __DIR__ . '/../scripts/db.php';
 
-// Обработчик запросов методом GET.
-function admin_get($request) {
-  // Достаем данные из БД, форматируем, санитизуем, складываем в массив, передаем в шаблон для вывода в HTML.
-  $params = [
-    0 => ['Колонка 1', 'Колонка 2'],
-    1 => ['Колонка 1', 'Колонка 2'],
-    2 => ['Колонка 1', 'Колонка 2']];
-  // Пример возврата html из шаблона с передачей параметров.
-  return theme('admin', ['admin' => $params]);
+function admin_get($request, $db) {
+    $user_log = $_SERVER['PHP_AUTH_USER'] ?? '';
+    $user_pass = $_SERVER['PHP_AUTH_PW'] ?? '';
+    
+    if (empty($user_log) || empty($user_pass) || 
+        !admin_login_check($db, $user_log) || 
+        !admin_password_check($db, $user_log, $user_pass)) {
+        
+        header('HTTP/1.1 401 Unauthorized');
+        header('WWW-Authenticate: Basic realm="Admin Panel"');
+        return theme('401');
+    }
+
+    $language_table = $db->query("
+        SELECT p.name, COUNT(al.application_id) as count 
+        FROM programming_languages p
+        LEFT JOIN application_languages al ON p.id = al.language_id
+        GROUP BY p.id
+        ORDER BY count DESC
+    ")->fetchAll();
+
+    $user_table = $db->query("
+        SELECT u.id, u.login, COUNT(ua.application_id) as apps_count
+        FROM users u
+        LEFT JOIN user_applications ua ON u.id = ua.user_id
+        GROUP BY u.id
+    ")->fetchAll();
+
+    return theme('admin', [
+        'language_stats' => $language_table,
+        'users' => $user_table
+    ]);
 }
 
-// Обработчик запросов методом POST.
-function admin_post($request, $url_param_1) {
-  // Санитизуем параметр в URL и удаляем строку в БД.
-  $id = intval($url_param_1);
-  
-  // Пример возврата редиректа после обработки формы для реализации принципа Post-redirect-Get.
-  return redirect('admin');
+function admin_post($request, $db) {
+    $user_log = $_SERVER['PHP_AUTH_USER'] ?? '';
+    
+    if (!empty($request['del_by_uid']) && !empty($user_log)) {
+        $stmt = $db->prepare("DELETE FROM users WHERE id = ?");
+        $stmt->execute([$request['del_by_uid']]);
+    }
+    
+    return redirect('admin');
 }
+
+$db = db_connect();
+$response = ($_SERVER['REQUEST_METHOD'] === 'POST') 
+    ? admin_post($_POST, $db) 
+    : admin_get($_GET, $db);
+
+echo $response;
