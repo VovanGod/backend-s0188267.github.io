@@ -80,6 +80,9 @@
 
     height: 100%;
     min-height: 1px;
+
+    justify-content: center;
+    align-items: center;
 }
 [dir='rtl'] .slick-slide
 {
@@ -88,6 +91,7 @@
 .slick-slide img
 {
     display: block;
+    margin-right: 20px;
 }
 .slick-slide.slick-loading img
 {
@@ -99,7 +103,7 @@
 }
 .slick-initialized .slick-slide
 {
-    display: block;
+    display: flex;
 }
 .slick-loading .slick-slide
 {

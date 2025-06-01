@@ -551,6 +551,7 @@
 
                 <div class="slide p-2 col-12 col-md-8">
                   <img class="mb-4" alt="rev-logo-1" src="./styles/img/logo_0.png">
+                  <div class="wrap">
                   <div class="slide-body">
                     Долгие поиски единственного и неповторимого мастера на многострадальный сайт www.cielparfum.com, 
                     который был собран крайне некомпетентным программистом и раз в месяц стабильно грозил погибнуть,
@@ -568,6 +569,7 @@
                   <div class="slide-bot">
                     С уважением, Наталья Сушкова руководитель Отдела веб-проектов Группы компаний «Си Эль парфюм» 
                     <a href="http://www.cielparfum.com/" tabindex="0">http://www.cielparfum.com/</a>
+                  </div>
                   </div>
                 </div>
                   
